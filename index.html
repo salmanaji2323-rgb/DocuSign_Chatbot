@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DocuSing — Assistant Intelligent</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600&family=Space+Mono:wght@700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --a:#4f6ef7;--ah:#3a58e0;--al:#eef0ff;
+  --dk:#1a1a2e;--tx:#1e2030;--t2:#5a6380;--mu:#8891b4;
+  --bg:#fff;--sf:#f5f7ff;--bd:rgba(79,110,247,0.15);--bb:#f0f3ff;
+  --green:#4ade80;
+}
+body{font-family:'Sora',sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#eef0ff,#f5f7ff 60%,#fce8ff);padding:16px}
+
+/* ── SETUP ── */
+#setup{width:100%;max-width:460px;background:#fff;border-radius:22px;padding:38px 34px;box-shadow:0 20px 60px rgba(79,110,247,0.14);text-align:center}
+.logo-big{width:62px;height:62px;background:var(--a);border-radius:16px;display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-weight:700;font-size:16px;color:#fff;letter-spacing:-1px;margin:0 auto 18px;box-shadow:0 8px 24px rgba(79,110,247,.3)}
+#setup h1{font-size:21px;font-weight:600;color:var(--tx);letter-spacing:-.4px;margin-bottom:6px}
+#setup .sub{font-size:13px;color:var(--t2);line-height:1.65;margin-bottom:26px}
+.badge{display:inline-flex;align-items:center;gap:5px;background:#ecfdf5;color:#059669;border:1px solid #a7f3d0;border-radius:20px;padding:4px 12px;font-size:12px;font-weight:500;margin-bottom:20px}
+.steps{text-align:left;background:var(--sf);border-radius:14px;padding:16px 18px;margin-bottom:20px}
+.step{display:flex;align-items:flex-start;gap:10px;margin-bottom:12px;font-size:13px;color:var(--tx);line-height:1.5}
+.step:last-child{margin-bottom:0}
+.step-num{width:22px;height:22px;border-radius:50%;background:var(--a);color:#fff;font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.step a{color:var(--a);font-weight:500;text-decoration:none}
+.step a:hover{text-decoration:underline}
+.lbl{display:block;text-align:left;font-size:11px;font-weight:500;color:var(--mu);text-transform:uppercase;letter-spacing:.7px;margin-bottom:7px}
+#groq-key{width:100%;border:1.5px solid var(--bd);border-radius:12px;padding:12px 14px;font-size:13px;font-family:'Space Mono',monospace;color:var(--tx);background:var(--sf);outline:none;transition:border-color .2s;letter-spacing:.3px}
+#groq-key:focus{border-color:var(--a)}
+#groq-key::placeholder{font-family:'Sora',sans-serif;letter-spacing:0;color:var(--mu);font-size:12.5px}
+.remember{display:flex;align-items:center;gap:8px;margin:10px 0 16px;text-align:left}
+.remember input{width:15px;height:15px;accent-color:var(--a);cursor:pointer}
+.remember label{font-size:12px;color:var(--t2);cursor:pointer}
+.btn-start{width:100%;padding:13px;background:var(--a);color:#fff;border:none;border-radius:12px;font-family:'Sora',sans-serif;font-size:14px;font-weight:600;cursor:pointer;box-shadow:0 6px 20px rgba(79,110,247,.28);transition:background .2s,transform .1s}
+.btn-start:hover{background:var(--ah)}
+.btn-start:active{transform:scale(.98)}
+#setup-err{display:none;margin-top:10px;font-size:12px;color:#dc2626;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:8px 12px}
+.note{margin-top:14px;font-size:11px;color:var(--mu);line-height:1.6}
+
+/* ── CHAT ── */
+#chat{display:none;width:100%;max-width:760px;height:650px;background:var(--bg);border-radius:22px;overflow:hidden;box-shadow:0 20px 60px rgba(79,110,247,.14);flex-direction:column}
+.hdr{display:flex;align-items:center;gap:12px;padding:15px 20px;background:var(--dk);flex-shrink:0}
+.hdr-logo{width:40px;height:40px;border-radius:11px;background:var(--a);display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-weight:700;font-size:12px;color:#fff;letter-spacing:-1px;flex-shrink:0}
+.hdr-info h2{font-size:15px;font-weight:600;color:#fff;letter-spacing:-.3px}
+.hdr-info p{font-size:11px;color:rgba(255,255,255,.45)}
+.hdr-right{margin-left:auto;display:flex;align-items:center;gap:8px}
+.pill{display:flex;align-items:center;gap:5px;background:rgba(74,222,128,.12);border:1px solid rgba(74,222,128,.28);border-radius:20px;padding:4px 10px;font-size:11px;color:var(--green);font-weight:500}
+.pill::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--green)}
+.gbtn{background:rgba(255,255,255,.08);border:none;color:rgba(255,255,255,.5);font-size:11px;font-family:'Sora',sans-serif;padding:5px 10px;border-radius:7px;cursor:pointer;transition:background .15s}
+.gbtn:hover{background:rgba(255,255,255,.16);color:#fff}
+.scs{display:flex;gap:6px;padding:9px 16px;background:var(--sf);border-bottom:1px solid var(--bd);overflow-x:auto;flex-shrink:0}
+.scs::-webkit-scrollbar{display:none}
+.sc{white-space:nowrap;background:#fff;color:var(--a);border:1px solid var(--bd);border-radius:20px;padding:5px 13px;font-size:11.5px;font-weight:500;cursor:pointer;font-family:'Sora',sans-serif;transition:all .15s;flex-shrink:0}
+.sc:hover{background:var(--a);color:#fff;border-color:var(--a)}
+.msgs{flex:1;overflow-y:auto;padding:20px 18px;display:flex;flex-direction:column;gap:14px;scroll-behavior:smooth}
+.msgs::-webkit-scrollbar{width:4px}
+.msgs::-webkit-scrollbar-thumb{background:var(--bd);border-radius:2px}
+.msg{display:flex;gap:9px;animation:up .22s ease}
+@keyframes up{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+.msg.u{flex-direction:row-reverse}
+.av{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;flex-shrink:0;align-self:flex-end}
+.av.b{background:var(--a);color:#fff;font-family:'Space Mono',monospace;font-size:8.5px}
+.av.u{background:var(--dk);color:#fff}
+.bbl{max-width:78%;padding:10px 14px;border-radius:15px;font-size:13.5px;line-height:1.7}
+.bbl.b{background:var(--bb);color:var(--tx);border:1px solid var(--bd);border-bottom-left-radius:3px}
+.bbl.u{background:var(--a);color:#fff;border-bottom-right-radius:3px}
+.bbl strong{font-weight:600}
+.bbl ul{padding-left:16px;margin-top:5px}
+.bbl li{margin-bottom:3px}
+.bbl code{background:rgba(79,110,247,.1);padding:1px 5px;border-radius:4px;font-size:12px;font-family:'Space Mono',monospace}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}
+.chip{background:#fff;color:var(--a);border:1.5px solid var(--bd);border-radius:20px;padding:5px 12px;font-size:11.5px;font-weight:500;cursor:pointer;font-family:'Sora',sans-serif;transition:all .15s}
+.chip:hover{background:var(--a);color:#fff;border-color:var(--a)}
+.dots{display:flex;gap:4px;align-items:center;padding:3px 0}
+.dots span{width:7px;height:7px;border-radius:50%;background:var(--mu);animation:bounce 1.1s infinite ease-in-out}
+.dots span:nth-child(2){animation-delay:.18s}
+.dots span:nth-child(3){animation-delay:.36s}
+@keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-7px)}}
+.ibar{display:flex;gap:9px;align-items:flex-end;padding:13px 16px;border-top:1px solid rgba(79,110,247,.08);background:var(--bg);flex-shrink:0}
+#inp{flex:1;border:1.5px solid var(--bd);border-radius:13px;padding:11px 14px;font-size:13.5px;font-family:'Sora',sans-serif;color:var(--tx);background:var(--sf);outline:none;resize:none;line-height:1.4;min-height:44px;max-height:110px;transition:border-color .2s}
+#inp:focus{border-color:var(--a)}
+#inp::placeholder{color:var(--mu)}
+#snd{width:44px;height:44px;border-radius:13px;background:var(--a);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 4px 14px rgba(79,110,247,.28);transition:background .15s,transform .1s}
+#snd:hover{background:var(--ah)}
+#snd:active{transform:scale(.95)}
+#snd:disabled{opacity:.45;cursor:not-allowed;transform:none}
+#snd svg{fill:#fff}
+#chat-err{display:none;margin:0 16px 8px;font-size:12px;color:#dc2626;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:8px 12px}
+</style>
+</head>
+<body>
+
+<!-- SETUP -->
+<div id="setup">
+  <div class="logo-big">DS</div>
+  <h1>DocuSing Assistant</h1>
+  <p class="sub">Chatbot intelligent propulsé par une IA réelle.<br>Utilisez <strong>Groq</strong> — 100% gratuit, sans carte bancaire.</p>
+
+  <div class="badge">✅ Gratuit · Sans carte bancaire · Sans limite</div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div>Allez sur <a href="https://console.groq.com/keys" target="_blank">console.groq.com/keys</a> et créez un compte gratuit (juste un email)</div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div>Cliquez sur <strong>"Create API Key"</strong> et copiez la clé générée</div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div>Collez la clé ci-dessous et démarrez le chatbot</div>
+    </div>
+  </div>
+
+  <label class="lbl" for="groq-key">Votre clé API Groq</label>
+  <input type="password" id="groq-key" placeholder="gsk_..." autocomplete="off" spellcheck="false">
+
+  <div class="remember">
+    <input type="checkbox" id="remember" checked>
+    <label for="remember">Mémoriser dans ce navigateur (ne plus saisir)</label>
+  </div>
+
+  <button class="btn-start" onclick="startChat()">Démarrer le chatbot →</button>
+  <div id="setup-err"></div>
+  <p class="note">🔒 Votre clé est envoyée uniquement à l'API Groq · Jamais stockée ailleurs</p>
+</div>
+
+<!-- CHAT -->
+<div id="chat">
+  <div class="hdr">
+    <div class="hdr-logo">DS</div>
+    <div class="hdr-info">
+      <h2>DocuSing Assistant</h2>
+      <p>Propulsé par Groq IA · Réponses précises</p>
+    </div>
+    <div class="hdr-right">
+      <div class="pill">En ligne</div>
+      <button class="gbtn" onclick="clearChat()">Effacer</button>
+      <button class="gbtn" onclick="changeKey()">Changer de clé</button>
+    </div>
+  </div>
+
+  <div class="scs">
+    <button class="sc" onclick="ask('Comment fonctionne DocuSing ?')">🖊 Fonctionnement</button>
+    <button class="sc" onclick="ask('Quels sont les tarifs ?')">💰 Tarifs</button>
+    <button class="sc" onclick="ask('DocuSing est-il conforme RGPD ?')">🔒 Sécurité</button>
+    <button class="sc" onclick="ask('Comment intégrer l\'API ?')">⚙️ API</button>
+    <button class="sc" onclick="ask('Comment envoyer un document à signer ?')">📄 Signer</button>
+    <button class="sc" onclick="ask('Y a-t-il un essai gratuit ?')">🎁 Essai gratuit</button>
+    <button class="sc" onclick="ask('Comment contacter le support ?')">💬 Support</button>
+  </div>
+
+  <div class="msgs" id="msgs"></div>
+  <div id="chat-err"></div>
+
+  <div class="ibar">
+    <textarea id="inp" placeholder="Posez n'importe quelle question sur DocuSing..." rows="1"></textarea>
+    <button id="snd" onclick="send()">
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+    </button>
+  </div>
+</div>
+
+<script>
+const SYSTEM = `Tu es l'assistant officiel de DocuSing, une plateforme SaaS de signature électronique moderne et sécurisée.
+
+INFORMATIONS COMPLÈTES SUR DOCUSING :
+
+Présentation :
+DocuSing est une solution de gestion et signature de documents électroniques. Elle permet d'envoyer, signer et archiver des documents 100% en ligne depuis n'importe quel appareil.
+
+Plans tarifaires :
+- Starter : 15€/mois, 5 utilisateurs, 50 enveloppes/mois
+- Business : 45€/mois, 25 utilisateurs, 300 enveloppes/mois (le plus populaire)
+- Enterprise : sur devis, utilisateurs et enveloppes illimités, SLA garanti
+- Essai gratuit 14 jours sur tous les plans, sans carte bancaire
+
+Fonctionnalités :
+- Signature électronique simple, avancée et qualifiée (conformes eIDAS)
+- Workflows multi-signataires : séquentiel, parallèle, conditionnel
+- Modèles de documents réutilisables
+- Rappels automatiques aux signataires (24h, 48h, 72h, personnalisable)
+- Tableau de bord analytics temps réel
+- Signature via email ou SMS
+- Formats acceptés : PDF, Word (.docx), images JPG/PNG (max 25 Mo)
+- Application mobile iOS et Android
+- Archivage légal 10 ans
+
+Sécurité et conformité :
+- Certifié ISO 27001
+- Conforme RGPD
+- Chiffrement AES-256 et TLS 1.3
+- Hébergement en France (données souveraines)
+- Horodatage qualifié, piste d'audit complète
+- Valeur légale dans toute l'UE (eIDAS)
+
+Intégrations et API :
+- API REST complète (docs sur docs.docusing.com)
+- SDKs : JavaScript, Python, PHP, Java
+- Webhooks temps réel
+- Intégrations natives : Salesforce, HubSpot, SAP, Oracle, Slack, Teams, Google Drive, Dropbox, Zapier, Make
+
+Support :
+- Chat en direct : lun-ven 9h-18h
+- Email : support@docusing.com (réponse sous 24h)
+- Base de connaissances : help.docusing.com
+- Support prioritaire Enterprise
+
+RÈGLES :
+- Réponds TOUJOURS en français
+- Sois précis, concis et utile
+- Réponds exactement à ce que l'utilisateur demande
+- Si la question ne concerne pas DocuSing, réponds poliment et redirige vers DocuSing
+- Utilise des listes à puces pour structurer tes réponses quand c'est pertinent`;
+
+const WELCOME_CHIPS = ['Comment fonctionne DocuSing ?','Quels sont les tarifs ?','Y a-t-il un essai gratuit ?','DocuSing est-il sécurisé ?'];
+
+let apiKey = '';
+let history = [];
+let busy = false;
+
+const setupEl = document.getElementById('setup');
+const chatEl  = document.getElementById('chat');
+const msgsEl  = document.getElementById('msgs');
+const inp     = document.getElementById('inp');
+const snd     = document.getElementById('snd');
+const chatErr = document.getElementById('chat-err');
+
+window.onload = () => {
+  const saved = localStorage.getItem('docusing_groq_key');
+  if(saved){ apiKey = saved; showChat(); }
+};
+
+function startChat(){
+  const key = document.getElementById('groq-key').value.trim();
+  const err = document.getElementById('setup-err');
+  if(!key || !key.startsWith('gsk_')){
+    err.style.display='block';
+    err.textContent='Clé invalide. Elle doit commencer par "gsk_". Créez-la gratuitement sur console.groq.com';
+    return;
+  }
+  apiKey = key;
+  if(document.getElementById('remember').checked) localStorage.setItem('docusing_groq_key', key);
+  err.style.display='none';
+  showChat();
+}
+
+function showChat(){
+  setupEl.style.display='none';
+  chatEl.style.display='flex';
+  addBot('Bonjour ! 👋 Je suis l\'assistant <strong>DocuSing</strong>, propulsé par une IA réelle.<br>Posez-moi <strong>n\'importe quelle question</strong> sur notre plateforme — je réponds précisément à ce que vous demandez !', WELCOME_CHIPS);
+  inp.focus();
+}
+
+function changeKey(){
+  localStorage.removeItem('docusing_groq_key');
+  apiKey=''; history=[];
+  chatEl.style.display='none';
+  setupEl.style.display='block';
+  document.getElementById('groq-key').value='';
+}
+
+function clearChat(){
+  msgsEl.innerHTML=''; history=[];
+  addBot('Conversation effacée. Comment puis-je vous aider ?', WELCOME_CHIPS);
+}
+
+function escHtml(t){ return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function mdToHtml(md){
+  return md
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g,'<em>$1</em>')
+    .replace(/`([^`]+)`/g,'<code>$1</code>')
+    .replace(/^#{1,3} (.+)$/gm,'<strong>$1</strong>')
+    .replace(/^- (.+)$/gm,'<li>$1</li>')
+    .replace(/(<li>[\s\S]*?<\/li>)+/g, m=>'<ul>'+m+'</ul>')
+    .replace(/\n{2,}/g,'<br><br>')
+    .replace(/\n/g,'<br>');
+}
+
+function addBot(html, chips){
+  const wrap=document.createElement('div'); wrap.className='msg';
+  const av=document.createElement('div'); av.className='av b'; av.textContent='DS';
+  const bbl=document.createElement('div'); bbl.className='bbl b'; bbl.innerHTML=html;
+  if(chips?.length){
+    const row=document.createElement('div'); row.className='chips';
+    chips.forEach(c=>{
+      const btn=document.createElement('button'); btn.className='chip'; btn.textContent=c;
+      btn.onclick=()=>ask(c); row.appendChild(btn);
+    });
+    bbl.appendChild(row);
+  }
+  wrap.appendChild(av); wrap.appendChild(bbl);
+  msgsEl.appendChild(wrap);
+  msgsEl.scrollTop=msgsEl.scrollHeight;
+}
+
+function addUser(text){
+  const wrap=document.createElement('div'); wrap.className='msg u';
+  const av=document.createElement('div'); av.className='av u'; av.textContent='Moi';
+  const bbl=document.createElement('div'); bbl.className='bbl u'; bbl.textContent=text;
+  wrap.appendChild(av); wrap.appendChild(bbl);
+  msgsEl.appendChild(wrap);
+  msgsEl.scrollTop=msgsEl.scrollHeight;
+}
+
+function showTyping(){
+  const wrap=document.createElement('div'); wrap.className='msg'; wrap.id='typing';
+  const av=document.createElement('div'); av.className='av b'; av.textContent='DS';
+  const bbl=document.createElement('div'); bbl.className='bbl b';
+  bbl.innerHTML='<div class="dots"><span></span><span></span><span></span></div>';
+  wrap.appendChild(av); wrap.appendChild(bbl);
+  msgsEl.appendChild(wrap);
+  msgsEl.scrollTop=msgsEl.scrollHeight;
+}
+
+function hideTyping(){ const e=document.getElementById('typing'); if(e)e.remove(); }
+
+async function callGroq(text){
+  history.push({role:'user', content:text});
+  const res = await fetch('https://api.groq.com/openai/v1/chat/completions',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+apiKey},
+    body: JSON.stringify({
+      model:'llama-3.1-8b-instant',
+      max_tokens:800,
+      messages:[
+        {role:'system', content:SYSTEM},
+        ...history
+      ]
+    })
+  });
+  if(!res.ok){
+    const e=await res.json().catch(()=>({}));
+    if(res.status===401) throw new Error('Clé API invalide. Cliquez sur "Changer de clé".');
+    throw new Error(e?.error?.message||'Erreur '+res.status);
+  }
+  const data=await res.json();
+  const reply=data.choices?.[0]?.message?.content||'';
+  history.push({role:'assistant', content:reply});
+  return reply;
+}
+
+async function doSend(text){
+  if(!text.trim()||busy) return;
+  busy=true; snd.disabled=true;
+  chatErr.style.display='none';
+  addUser(text);
+  showTyping();
+  try{
+    const reply=await callGroq(text);
+    hideTyping();
+    addBot(mdToHtml(reply));
+  }catch(e){
+    hideTyping();
+    chatErr.textContent='Erreur : '+e.message;
+    chatErr.style.display='block';
+    history.pop();
+  }
+  busy=false; snd.disabled=false; inp.focus();
+}
+
+function send(){ const t=inp.value.trim(); inp.value=''; inp.style.height='auto'; doSend(t); }
+function ask(t){ doSend(t); }
+
+inp.addEventListener('keydown',e=>{ if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send();} });
+inp.addEventListener('input',()=>{ inp.style.height='auto'; inp.style.height=Math.min(inp.scrollHeight,110)+'px'; });
+document.getElementById('groq-key').addEventListener('keydown',e=>{ if(e.key==='Enter')startChat(); });
+</script>
+</body>
+</html>
